@@ -3,14 +3,17 @@ import "./App.css";
 import { Button } from "./components/Button";
 import { Input } from "./components/Input";
 import { ClearButton } from "./components/ClearButton";
+import Navigation from "./components/Navigation/Navigation";
+import SignIn from "./components/SignIn/SignIn"
+import Register from "./components/Register/Register"
 import * as math from "mathjs";
 
 class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      //route: "signin",
-      //isSignedIn: false,
+      route: "signin",
+      isSignedIn: false,
       user: {
         id:'' ,
         name:'' ,
@@ -20,16 +23,25 @@ class App extends Component {
     };
   }
 
-  // loadUser = (data) => {
-  //   this.setState({user: {
-  //     id: data.id,
-  //     name: data.name,
-  //     email: data.email,
-  //     input: data.input
-  //   }})
-  //   console.log('User previous value is ', this.state.user.input)
-  // }
+  loadUser = (data) => {
+    this.setState({user: {
+      id: data.id,
+      name: data.name,
+      email: data.email,
+      input: data.input
+    }})
+    console.log('User previous value is ', this.state.user.input)
+  }
 
+
+  onRouteChange = (route) => {
+    if (route === 'home'){
+      this.setState({isSignedIn: true})
+    }else {
+      this.setState({isSignedIn: false})
+    }
+    this.setState({route: route});
+  }
 
   addToInput = val => {
     var user = {...this.state.user}
@@ -45,8 +57,8 @@ class App extends Component {
       method: 'post',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({
-        //id:this.state.user.id,
-        input: this.state.user.input,
+        id:this.state.user.id,
+        input: math.evaluate(this.state.user.input),
       })
     })
     .then(response => response.json())
@@ -63,8 +75,12 @@ class App extends Component {
   
   render() {
     return (
-      <div className="App">
-
+      <div>
+        <Navigation isSignedIn={this.state.isSignedIn} onRouteChange={this.onRouteChange}/>
+        <div>
+        {
+            this.state.route === 'home' ?
+        <div className= "App">    
         <div className="calc-wrapper">
           <Input input={this.state.user.input} />
           <div className="row">
@@ -97,6 +113,19 @@ class App extends Component {
             </ClearButton>
           </div>
         </div>
+        </div>
+        :(
+          this.state.route  === 'signin' ? 
+          <SignIn loadUser={this.loadUser} onRouteChange={this.onRouteChange}/>
+          : (
+            this.state.route  === 'signout' ?
+            <SignIn loadUser= {this.loadUser} onRouteChange={this.onRouteChange}/>
+            : <Register loadUser= {this.loadUser} onRouteChange={this.onRouteChange}/>
+          )
+        )
+        }
+
+      </div>
       </div>
     );
   }
